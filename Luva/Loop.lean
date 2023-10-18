@@ -8,6 +8,7 @@ namespace Loop
 
 /- Runs a loop -/
 @[extern "luvaRunLoop"] opaque run (loop: Loop) (runMode: UInt32): IO UInt32
+
 end Loop
 
 
