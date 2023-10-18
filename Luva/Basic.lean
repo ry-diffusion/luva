@@ -1,1 +1,2 @@
-def hello := "world"
+@[extern "salude"]
+opaque salude : String → IO String

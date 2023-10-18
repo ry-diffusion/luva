@@ -1,3 +1,5 @@
 build
 lakefile.olean
+compile_commands.json
+.cache/
 /lake-packages/*

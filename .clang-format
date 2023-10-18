@@ -1,0 +1,8 @@
+AlignConsecutiveBitFields:
+  Enabled: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: Empty
+BreakBeforeBraces: Allman
+IncludeBlocks: Regroup
+IndentWidth: 8
+BasedOnStyle: Google
