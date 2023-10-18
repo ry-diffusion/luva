@@ -1,0 +1,5 @@
+{"version": 6,
+ "packagesDir": "lake-packages",
+ "packages":
+ [{"path": {"opts": {}, "name": "luva", "inherited": false, "dir": "./.."}}],
+ "name": "luvaSamples"}
