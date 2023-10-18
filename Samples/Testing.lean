@@ -1,5 +1,6 @@
 import «Luva»
 
 def main : IO Unit := do
-  let binding := ← salude "hey"
-  IO.println s!"From C: {binding}"
+  let x := (← uv_create_loop)
+  IO.println "bye!" 
+  
