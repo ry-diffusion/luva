@@ -3,7 +3,7 @@ import «Luva»
 def appMain (path: String) : IO UInt32 := do
   let req ← FileSystem.Request.mk
   let loop ← Loop.mk
-  let buff ← Buffer.mk 1024
+  let buff ← Buffer.fromByteArray (ByteArray.mk #[1, 2, 3, 4, 5])
   let byteArray ← buff.asByteArray()
   ← IO.println s!"buffer {byteArray}"
   return ← loop.run Loop.RunMode.once
