@@ -1,23 +1,24 @@
 import «Luva»
 
 def onOpen (req: FileSystem.Request) := do
-  let result ← req.result 
-  IO.println s!"open file! result: {result}"
+  let result ← req.result
+  let data ← req.data UInt32
+  IO.println s!"open file! result: {result} -> {data}"
 
 def appMain (path: String) : IO UInt32 := do
   let req ← FileSystem.Request.mk
+  let papa ←  req.setData 5
   let loop ← Loop.mk
   let buff ← Buffer.fromByteArray (ByteArray.mk #[1, 2, 3, 4, 5])
   let byteArray ← buff.asByteArray
   IO.println s!"buffer {byteArray}"
-  let _ := ← loop.openFile path req FileSystem.Flags.readOnly 
+  let _ := ← loop.openFile path req FileSystem.Flags.readOnly
           FileSystem.Mode.default onOpen
-  
+
   loop.run Loop.RunMode.once
 
 def main (args: List String) : IO UInt32 := match (args) with
   | arg :: _ => appMain arg
-  | [] => do 
+  | [] => do
     IO.println "No arguments baby? Come back when you have an argument."
     return 1
-   

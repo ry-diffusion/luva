@@ -6,12 +6,12 @@ opaque Request.Nonempty : NonemptyType
 def Request : Type := Request.Nonempty.type
 instance : Nonempty Request := Request.Nonempty.property
 
-def FilesystemContinue := Request → IO Unit 
-
-
+def FilesystemContinue := Request → IO Unit
 
 namespace Request
 @[extern "luvaMakeRequest"] opaque mk : IO Request
+@[extern "luvaRequestSetData"] opaque setData : @&Request → α → IO Unit
+@[extern "luvaRequestGetData"] opaque data : @&Request → (α : Type) → IO α
 @[extern "luvaRequestResult"] opaque result : @&Request → IO Int
 end Request
 
@@ -31,4 +31,4 @@ end FileSystem
 namespace Loop
 @[extern "luvaOpenFile"] opaque openFile (loop: @&Loop) (path: String) (request: FileSystem.Request)
                         (flags: UInt32) (mode: UInt32) (next: FileSystemContinue): IO UInt32
-end Loop                    
+end Loop

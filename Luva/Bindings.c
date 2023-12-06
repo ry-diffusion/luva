@@ -16,6 +16,11 @@ inline static void noop_foreach(void *mod, b_lean_obj_arg fn)
 {
 }
 
+typedef struct LuvaRequest
+{
+        lean_obj_arg payload, callback;
+} LR;
+
 static uv_buf_t *createSizedUvBuffer(size_t size)
 {
         char *contents = calloc(size, sizeof(char));
@@ -47,6 +52,8 @@ static void finalizeBuffer(void *pBuffer)
 
 static void finalizeFsRequest(void *pReq)
 {
+        uv_fs_t *uvReq = pReq;
+        free(uvReq->data);
         uv_fs_req_cleanup((uv_fs_t *)pReq);
         free(pReq);
 }
@@ -82,9 +89,11 @@ Function luvaRunLoop(lean_object *obj, lean_object *obj2)
 
 static void fsCallbackProcess(uv_fs_t *req)
 {
-        assert(lean_is_closure(req->data));
+        LR *lr = (LR *)req->data;
 
-        lean_object *monad = ((FSContinue)(lean_closure_fun(req->data)))(
+        assert(lean_is_closure(lr->callback));
+
+        lean_object *monad = ((FSContinue)(lean_closure_fun(lr->callback)))(
             lean_alloc_external(gFileSystemRequestClass, req));
 
         (void)monad;
@@ -105,6 +114,7 @@ Function luvaMakeRequest()
 {
         uv_fs_t *request = (uv_fs_t *)malloc(sizeof(uv_fs_t));
         memset(request, 0, sizeof(uv_fs_t));
+        request->data = (LR *)calloc(sizeof(LR), 1);
 
         return lean_io_result_mk_ok(
             lean_alloc_external(gFileSystemRequestClass, request));
@@ -119,7 +129,12 @@ Function luvaOpenFile(lean_obj_arg self, lean_obj_arg objPath,
         const char *path = lean_string_cstr(objPath);
         const uint32_t flags = lean_unbox_uint32(objFlags);
         const uint32_t mode = lean_unbox_uint32(objMode);
-        req->data = objNext;
+        LR *const lr = (LR *)req->data;
+
+        assert(lr);
+
+        lr->callback = objNext;
+
         if (uv_fs_open(L, req, path, flags, mode, fsCallbackProcess) != 0)
         {
                 return lean_io_result_mk_error(lean_mk_io_user_error(
@@ -166,4 +181,19 @@ Function luvaRequestResult(lean_object *objSelf)
 {
         uv_fs_t *req = lean_get_external_data(objSelf);
         return lean_io_result_mk_ok(lean_box(req->result));
+}
+
+Function luvaRequestSetData(lean_object *objSelf, lean_obj_arg data)
+{
+        uv_fs_t *req = lean_get_external_data(objSelf);
+        LR *lr = (LR *)req->data;
+        lr->payload = data;
+        return lean_io_result_mk_ok(lean_box(0));
+}
+
+Function luvaRequestGetData(lean_obj_arg self)
+{
+        uv_fs_t *req = lean_get_external_data(self);
+        LR *lr = (LR *)req->data;
+        return lean_io_result_mk_ok(lr->payload);
 }
